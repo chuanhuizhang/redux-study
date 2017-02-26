@@ -52,9 +52,6 @@ const todoApp = combineReducers({
   visibilityFilter
 });
 
-import { createStore } from 'redux';
-const store = createStore(todoApp);
-
 const Link = ({
   active,
   children,
@@ -75,8 +72,11 @@ const Link = ({
   );
 };
 
+const { Component } = React;
+
 class FilterLink extends Component {
   componentDidMount() {
+    const { store } = this.props;
     this.unsubscribe = store.subscribe(() => {
       this.forceUpdate()
     })
@@ -86,6 +86,7 @@ class FilterLink extends Component {
   }
   render() {
     const props = this.props;
+    const { store } = props;
     const state = store.getState();
     return (
       <Link
@@ -103,24 +104,27 @@ class FilterLink extends Component {
   }
 }
 
-const Footer = () => (
+const Footer = ({ store }) => (
   <p>
     Show:
     {' '}
     <FilterLink
       filter='SHOW_ALL'
+      store = { store }
     >
       All
     </FilterLink>
     {' '}
     <FilterLink
       filter='SHOW_ACTIVE'
+      store = { store }
     >
       Active
     </FilterLink>
     {' '}
     <FilterLink
       filter='SHOW_COMPLETED'
+      store = { store }
     >
       Completed
     </FilterLink>
@@ -157,7 +161,7 @@ const TodoList = ({
   </ul>
 }
 
-const AddTodo = () => {
+const AddTodo = ({ store }) => {
   let input;
   return (
     <div>
@@ -196,15 +200,17 @@ const getVisibleTodos = (todos, filter) => {
 
 class VisibleTodoList extends Component {
   componentDidMount() {
+    const { store } = this.props;
     this.unsubscribe = store.subscribe(() => {
-      this.forceUpdate()
-    })
+      this.forceUpdate();
+    });
   }
   componentWillUnmount() {
-    this.unsubscribe()
+    this.unsubscribe();
   }
   render() {
     const props = this.props;
+    const { store } = props;
     const state = store.getState();
 
     return (
@@ -227,15 +233,17 @@ class VisibleTodoList extends Component {
 }
 
 let nextTodoId = 0;
-const TodoApp = () => (
+const TodoApp = ({ store }) => (
   <div>
-    <AddTodo />
-    <VisibleTodoList />
-    <Footer />
+    <AddTodo store = {store} />
+    <VisibleTodoList store = {store} />
+    <Footer store = {store} />
   </div>
 );
 
+import { createStore } from 'redux';
+
 ReactDom.render(
-  <TodoApp />,
+  <TodoApp store = {createStore(todoApp)}/>,
   document.getElementById('app')
 );
